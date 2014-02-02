@@ -1,0 +1,241 @@
+#!/bin/sh
+echo "Babyrobot Deployment"
+
+show_invalid_input() {
+	echo "\n****** Invalid Input ******"
+}
+
+create_config() {
+	echo "Environments"
+	while [ 1 ];
+	do
+		echo "Enter Environment"
+		read filename
+
+		if [[ $filename ]]; then
+			break
+		else
+			show_invalid_input
+		fi
+	done
+	while [ 1 ];
+	do
+		echo "Enter User"
+		read user
+
+		if [[ $user ]]; then
+			break
+		else
+			show_invalid_input
+		fi
+	done
+	while [ 1 ];
+	do
+		echo "Enter IP"
+		read ip
+
+		if [[ $ip ]]; then
+			break
+		else
+			show_invalid_input
+		fi
+	done
+	while [ 1 ];
+	do
+		echo "Enter Path"
+		read path
+
+		if [[ $path ]]; then
+			break
+		else
+			show_invalid_input
+		fi
+	done
+
+  echo "user=$user\nip=$ip\npath=$path" > ~/.projects/$1/$filename.cfg
+}
+
+select_project() {
+  local selected_project
+  while [ 1 ];
+  do
+    show_projects
+    echo "Select a project"
+    echo "Enter full name of selected project"
+    read selected_project
+
+    if [ ! -d ~/.projects/$select_project ]; then
+      show_invalid_input
+    else
+      break
+    fi
+  done
+  echo "$selected_project"
+}
+
+edit_project() {
+  local action
+  while [ 1 ]; do
+    echo "\n-----------------------------------------------------------------"
+    echo "1) Add Environment"
+    echo "2) Rename Project"
+    echo "3) Edit Environment"
+    echo "4) Delete Environment"
+    echo "5) Exit"
+    echo "Select an action"
+    echo "Enter:"
+    read action
+    if [[ $action != 1 && $action != 2 && $action != 3 && $action != 4 && $action != 5 ]]; then
+      show_invalid_input
+    else
+      break
+    fi
+  done
+  case $action in
+    1)
+      select_project
+      create_config $pr
+      ;;
+    2)
+      ;;
+    3)
+      ;;
+    4)
+      show_projects
+      ;;
+    5)
+      manage_project
+      ;;
+  esac
+}
+
+create_project() {
+	echo "Create the project"
+	echo "Enter project name"
+	read name
+	mkdir ~/.projects/"$name"
+	while [ 1 ];
+	do
+		echo "Add environment? y or n"
+		read add
+		if [[ $add = y ]]; then
+			create_config "$name"
+		elif [[ $add = n ]]; then
+			manage_project
+		else
+			show_invalid_input
+		fi
+	done
+}
+
+show_projects() {
+	projects=$(ls ~/.projects)
+	echo "-------------------------------- Projects --------------------------------"
+	for dir in ~/.projects/*/
+	do
+    dir=${dir%*/}
+    echo ${dir##*/}
+	done
+}
+
+manage_project() {
+  local action
+	if [ ! -d ~/.projects ]; then
+		mkdir ~/.projects
+	fi
+	show_projects
+
+	# Show projects
+	if [[ $projects ]]; then
+		while [ 1 ]; do
+			echo "\n-----------------------------------------------------------------"
+			echo "Select action"
+			echo "1) Create project"
+			echo "2) Edit project"
+			echo "3) Delete project"
+			echo "4) Exit"
+      echo "Select an action"
+      echo "Enter:"
+			read action
+			if [[ $action != 1 && $action != 2 && $action != 3 && $action != 4 ]]; then
+				show_invalid_input
+			else
+				break
+			fi
+		done
+		# Execute the next function
+		case $action in
+			1)
+				create_project
+				;;
+			2)
+        edit_project
+				;;
+			3)
+				;;
+			4)
+				start_app
+				;;
+		esac
+	else
+		while [ 1 ]; do
+			echo "\n-----------------------------------------------------------------"
+			echo "No projects created yet"
+			echo "1) Create project"
+			echo "2) Exit"
+			read action
+			if [[ $action != 1 && $action != 2 ]]; then
+				show_invalid_input
+			else
+				break
+			fi
+		done
+		# Execute the next function
+		case $action in
+			1)
+				create_project
+				;;
+			2)
+				start_app
+				;;
+		esac
+	fi
+}
+
+deploy() {
+	echo Deploy
+}
+
+start_app() {
+  local action
+	# Get Action
+	while [ 1 ]; do
+		echo "\n-----------------------------------------------------------------"
+		echo "1) Manage Projects"
+		echo "2) Deploy"
+		echo "3) Exit"
+		echo "Select an action"
+		echo "Enter:"
+		read action
+		if [[ $action != 1 && $action != 2 && $action != 3 ]]; then
+			show_invalid_input
+		else
+			break
+		fi
+	done
+
+	# Execute the next function
+	case $action in
+		1)
+			manage_project
+			;;
+		2)
+			deploy
+			;;
+		3)
+			exit 1
+			;;
+	esac
+}
+
+start_app
