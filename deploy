@@ -56,7 +56,6 @@ create_config() {
 }
 
 select_project() {
-  local selected_project
   while [ 1 ];
   do
     show_projects
@@ -70,7 +69,6 @@ select_project() {
       break
     fi
   done
-  echo "$selected_project"
 }
 
 edit_project() {
@@ -93,8 +91,14 @@ edit_project() {
   done
   case $action in
     1)
-      select_project
-      create_config $pr
+      while [ 1 ];
+      do
+        select_project
+        if cd ~/.projects/$selected_project; then
+          create_config $selected_project
+          break
+        fi
+      done
       ;;
     2)
       ;;
